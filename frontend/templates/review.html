@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Review Draft — {{ company_name }} — StratoviqueAI{% endblock %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="review-page">
+
+  <div class="rp-header">
+    <div class="rp-header-left">
+      <div class="status-chip ready">
+        <span class="chip-dot"></span>Analysis Complete
+      </div>
+      <h1>{{ company_name }}</h1>
+      <p>Five agents have completed their analysis. Review below, then generate your final report.</p>
+    </div>
+    <div class="rp-header-right">
+      <form action="/approve/{{ session_id }}" method="POST" id="directForm">
+        <input type="hidden" name="feedback" value=""/>
+        <button type="submit" class="gen-report-btn" id="directBtn">
+          Generate Report
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Pipeline status bar -->
+  <div class="pipeline-status">
+    <div class="ps-node done"><span>01</span> Research</div>
+    <div class="ps-conn done"></div>
+    <div class="ps-node done"><span>02</span> Audience</div>
+    <div class="ps-conn done"></div>
+    <div class="ps-node done"><span>03</span> Channels</div>
+    <div class="ps-conn done"></div>
+    <div class="ps-node done"><span>04</span> Content</div>
+    <div class="ps-conn pending"></div>
+    <div class="ps-node pending"><span>05</span> Report</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="review-tabs">
+    <div class="tab-nav">
+      <button class="tn-btn active" data-tab="rt-1">Market Research</button>
+      <button class="tn-btn" data-tab="rt-2">Audience Profile</button>
+      <button class="tn-btn" data-tab="rt-3">Channel Strategy</button>
+      <button class="tn-btn" data-tab="rt-4">Content Strategy</button>
+    </div>
+
+    <div class="tab-body">
+      <div class="tb-panel active" id="rt-1">
+        <div class="md-content" data-raw="{{ state.market_research | e if state.market_research else 'Not available.' }}"></div>
+      </div>
+      <div class="tb-panel" id="rt-2">
+        <div class="md-content" data-raw="{{ state.audience_profile | e if state.audience_profile else 'Not available.' }}"></div>
+      </div>
+      <div class="tb-panel" id="rt-3">
+        <div class="md-content" data-raw="{{ state.channel_strategy | e if state.channel_strategy else 'Not available.' }}"></div>
+      </div>
+      <div class="tb-panel" id="rt-4">
+        <div class="md-content" data-raw="{{ state.content_strategy | e if state.content_strategy else 'Not available.' }}"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback (optional, collapsible) -->
+  <div class="feedback-panel">
+    <details>
+      <summary>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Add feedback before generating
+        <span class="opt-tag">Optional</span>
+      </summary>
+      <div class="fp-body">
+        <form action="/approve/{{ session_id }}" method="POST" id="feedbackForm">
+          <div class="fg full">
+            <label>Your Feedback</label>
+            <textarea name="feedback" rows="3"
+              placeholder="e.g. Focus more on LinkedIn. Emphasise the 40% cost savings. Tone should be more enterprise-focused…"></textarea>
+          </div>
+          <button type="submit" class="feedback-submit-btn" id="feedbackBtn">
+            Submit Feedback &amp; Generate
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </details>
+  </div>
+
+</div>
+
+<!-- Loading overlay -->
+<div class="gen-overlay" id="genOverlay" style="display:none;">
+  <div class="go-card">
+    <div class="go-logo">S</div>
+    <h3>Generating Report</h3>
+    <p>The Report Agent is synthesising all outputs…</p>
+    <div class="go-spinner"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Render markdown
+  marked.setOptions({ breaks: true, gfm: true });
+  document.querySelectorAll('.md-content').forEach(function (el) {
+    const raw = (el.getAttribute('data-raw') || '')
+      .replace(/&amp;/g,'&').replace(/&lt;/g,'<')
+      .replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+    el.innerHTML = marked.parse(raw);
+  });
+
+  // Tabs
+  document.querySelectorAll('.tn-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.tn-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tb-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Lock on submit
+  ['directForm','feedbackForm'].forEach(function (id) {
+    const f = document.getElementById(id);
+    if (f) f.addEventListener('submit', function () {
+      document.getElementById('genOverlay').style.display = 'flex';
+      ['directBtn','feedbackBtn'].forEach(b => {
+        const el = document.getElementById(b);
+        if (el) el.disabled = true;
+      });
+    });
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}StratoviqueAI{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- ── Shell ──────────────────────────────────────────────────────────── -->
+<div class="shell">
+
+  <!-- ── Sidebar ──────────────────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-top">
+      <div class="sb-brand">
+        <div class="sb-logo">S</div>
+        <span>Stratovique<em>AI</em></span>
+      </div>
+      <a href="/" class="sb-new-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        New Strategy
+      </a>
+    </div>
+
+    <div class="sb-section-label">History</div>
+
+    <div class="sb-history" id="sbHistory">
+      <div class="sb-empty" id="sbEmpty">
+        <p>No strategies yet.<br>Generate your first one.</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main Workspace ───────────────────────────────────────────────── -->
+  <div class="workspace" id="workspace">
+    <div class="ws-topbar">
+      <button class="sb-toggle" id="sbToggle" aria-label="Toggle sidebar">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="3.5" width="14" height="1.5" rx=".75" fill="currentColor"/>
+          <rect x="1" y="7.25" width="9" height="1.5" rx=".75" fill="currentColor"/>
+          <rect x="1" y="11" width="14" height="1.5" rx=".75" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="ws-topbar-right">
+        <span class="ws-badge">6-Agent Pipeline</span>
+        <span class="ws-version">v2.0</span>
+      </div>
+    </div>
+
+    <div class="ws-content">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+</div>
+
+<script src="/static/js/main.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}History — StratoviqueAI{% endblock %}
+
+{% block content %}
+<div class="history-page">
+  <div class="history-header">
+    <h1>Strategy History</h1>
+    <p>All reports generated in this session.</p>
+  </div>
+
+  {% if reports %}
+  <div class="history-grid">
+    {% for r in reports %}
+    <a href="/history/{{ r.session_id }}" class="hcard">
+      <div class="hcard-header">
+        <span class="hcard-company">{{ r.company_name }}</span>
+        <span class="hcard-date">{{ r.created_at }}</span>
+      </div>
+      <div class="hcard-tags">
+        <span class="tag">{{ r.industry }}</span>
+        <span class="tag">{{ r.budget }}</span>
+      </div>
+      <p class="hcard-goal">{{ r.goals }}</p>
+      <div class="hcard-footer">
+        <span>View Report →</span>
+        <code>{{ r.session_id[:8] }}</code>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="history-empty">
+    <div class="he-icon">📋</div>
+    <h2>No reports yet</h2>
+    <p>Generated reports will appear here.</p>
+    <a href="/" class="generate-btn" style="display:inline-flex;text-decoration:none;margin-top:8px;">
+      Generate Strategy
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-left:6px">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

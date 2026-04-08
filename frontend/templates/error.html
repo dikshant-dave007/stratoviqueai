@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Error — StratoviqueAI{% endblock %}
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <div class="error-layout">
+
+    <!-- Left: info -->
+    <div class="ep-left">
+      <div class="status-chip error">
+        <span class="chip-dot"></span>Pipeline Interrupted
+      </div>
+      <h1>Something went wrong</h1>
+      <p>An error occurred during generation. Your inputs are saved — you can retry or resubmit below without starting from scratch.</p>
+
+      {% if failed_step %}
+      <div class="ep-step">
+        <span class="ep-step-label">Failed at step</span>
+        <span class="ep-step-val">
+          {% if failed_step == "research" %}01 · Market Research Agent
+          {% elif failed_step == "audience" %}02 · Audience Profile Agent
+          {% elif failed_step == "channel" %}03 · Channel Strategy Agent
+          {% elif failed_step == "content" %}04 · Content Strategy Agent
+          {% elif failed_step == "report" %}05 · Report Agent
+          {% else %}{{ failed_step }}{% endif %}
+        </span>
+      </div>
+      {% endif %}
+
+      <div class="ep-trace">
+        <span class="ep-trace-label">Error details</span>
+        <pre>{{ error }}</pre>
+      </div>
+
+      {% if error %}
+        {% if "404" in error and "gemini" in error|lower %}
+        <div class="ep-hint">
+          <strong>💡 Invalid Gemini model name.</strong>
+          Open <code>.env</code> and set <code>GEMINI_MODEL=gemini-1.5-flash</code>
+        </div>
+        {% elif "api_key" in error|lower or "authentication" in error|lower %}
+        <div class="ep-hint">
+          <strong>💡 API key issue.</strong>
+          Check <code>GEMINI_API_KEY</code> in your <code>.env</code> file.
+        </div>
+        {% elif "serper" in error|lower %}
+        <div class="ep-hint">
+          <strong>💡 Search API issue.</strong>
+          Check <code>SERPER_API_KEY</code> in your <code>.env</code> file.
+        </div>
+        {% endif %}
+      {% endif %}
+
+      {% if session_id %}
+      <form action="/retry/{{ session_id }}" method="POST" id="retryForm">
+        <button type="submit" class="retry-btn" id="retryBtn">↻ Retry Pipeline</button>
+      </form>
+      {% endif %}
+    </div>
+
+    <!-- Right: resubmit form -->
+    <div class="ep-right">
+      <h2>Resubmit with corrections</h2>
+      <p>Inputs are pre-filled. Edit if needed.</p>
+
+      <form action="/generate" method="POST" id="resubmitForm">
+        <div class="fg-row">
+          <div class="fg">
+            <label>Company Name</label>
+            <input type="text" name="company_name" value="{{ inputs.company_name if inputs else '' }}" required/>
+          </div>
+          <div class="fg">
+            <label>Industry</label>
+            <select name="industry" required>
+              <option value="" disabled>Select…</option>
+              {% for ind in ["SaaS / Technology","E-commerce / Retail","Healthcare / MedTech","Finance / Fintech","Education / EdTech","Real Estate","Consumer Goods / FMCG","Professional Services","Media / Entertainment","Other"] %}
+              <option value="{{ ind }}" {% if inputs and inputs.industry == ind %}selected{% endif %}>{{ ind }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="fg full">
+          <label>Product Description</label>
+          <textarea name="product_description" rows="3" required>{{ inputs.product_description if inputs else '' }}</textarea>
+        </div>
+        <div class="fg full">
+          <label>Target Audience</label>
+          <input type="text" name="target_audience" value="{{ inputs.target_audience if inputs else '' }}" required/>
+        </div>
+        <div class="fg-row">
+          <div class="fg">
+            <label>Budget</label>
+            <select name="budget" required>
+              <option value="" disabled>Select…</option>
+              {% for b in ["Under $2,000/month","$2,000 - $5,000/month","$5,000 - $15,000/month","$15,000 - $50,000/month","$50,000+/month"] %}
+              <option value="{{ b }}" {% if inputs and inputs.budget == b %}selected{% endif %}>{{ b }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="fg">
+            <label>Goal</label>
+            <select name="goals" required>
+              <option value="" disabled>Select…</option>
+              {% for val, label in [("Brand awareness and visibility","Brand Awareness"),("Lead generation and pipeline growth","Lead Generation"),("Customer acquisition and sales conversion","Customer Acquisition"),("Customer retention and upsell","Retention & Upsell"),("Product launch and market entry","Product Launch"),("Community building and engagement","Community Building")] %}
+              <option value="{{ val }}" {% if inputs and inputs.goals == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="generate-btn" id="resubmitBtn">
+          Resubmit Strategy
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<div class="gen-overlay" id="genOverlay" style="display:none;">
+  <div class="go-card">
+    <div class="go-logo">S</div>
+    <h3>Restarting Pipeline</h3>
+    <p>Agents are being re-initialised…</p>
+    <div class="go-spinner"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+['resubmitForm','retryForm'].forEach(function(id){
+  const f = document.getElementById(id);
+  if(f) f.addEventListener('submit', function(){
+    document.getElementById('genOverlay').style.display = 'flex';
+    ['resubmitBtn','retryBtn'].forEach(b=>{const el=document.getElementById(b);if(el)el.disabled=true;});
+  });
+});
+</script>
+{% endblock %}

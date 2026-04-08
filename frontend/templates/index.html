@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}StratoviqueAI — AI Marketing Strategy Engine{% endblock %}
+
+{% block content %}
+<div class="home-page">
+
+  <!-- Hero area -->
+  <div class="home-hero">
+    <div class="hero-eyebrow">
+      <span class="agent-dot"></span>
+      Multi-Agent Intelligence Pipeline
+    </div>
+    <h1 class="hero-title">
+      Marketing strategy,<br>
+      <em>engineered by AI.</em>
+    </h1>
+    <p class="hero-sub">
+      Six specialized agents research your market, profile your audience,
+      design your channel mix, craft your messaging — and synthesize it
+      into an executive strategy report. Ready in 60–90 seconds.
+    </p>
+
+    <!-- Pipeline -->
+    <div class="pipeline">
+      <div class="pipeline-node">
+        <span class="pn-num">01</span>
+        <span class="pn-name">Research</span>
+      </div>
+      <div class="pipeline-conn"></div>
+      <div class="pipeline-node">
+        <span class="pn-num">02</span>
+        <span class="pn-name">Audience</span>
+      </div>
+      <div class="pipeline-conn"></div>
+      <div class="pipeline-node">
+        <span class="pn-num">03</span>
+        <span class="pn-name">Channels</span>
+      </div>
+      <div class="pipeline-conn"></div>
+      <div class="pipeline-node">
+        <span class="pn-num">04</span>
+        <span class="pn-name">Content</span>
+      </div>
+      <div class="pipeline-conn"></div>
+      <div class="pipeline-node highlight">
+        <span class="pn-num">05</span>
+        <span class="pn-name">Report</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form card -->
+  <div class="form-card" id="strategyFormCard">
+    <div class="form-card-header">
+      <h2>Brief your AI strategy team</h2>
+      <p>Fill in your details below — the agents handle the rest.</p>
+    </div>
+
+    <form action="/generate" method="POST" id="strategyForm">
+
+      <div class="fg-row">
+        <div class="fg">
+          <label>Company Name <span class="req">*</span></label>
+          <input type="text" name="company_name" placeholder="e.g. GreenCharge" required/>
+        </div>
+        <div class="fg">
+          <label>Industry <span class="req">*</span></label>
+          <select name="industry" required>
+            <option value="" disabled selected>Select industry…</option>
+            <option>SaaS / Technology</option>
+            <option>E-commerce / Retail</option>
+            <option>Healthcare / MedTech</option>
+            <option>Finance / Fintech</option>
+            <option>Education / EdTech</option>
+            <option>Real Estate</option>
+            <option>Consumer Goods / FMCG</option>
+            <option>Professional Services</option>
+            <option>Media / Entertainment</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fg full">
+        <label>Product / Service Description <span class="req">*</span></label>
+        <textarea name="product_description" rows="3"
+          placeholder="Describe what you sell, its core value, and what makes it different…" required></textarea>
+      </div>
+
+      <div class="fg full">
+        <label>Target Audience <span class="req">*</span></label>
+        <input type="text" name="target_audience"
+          placeholder="e.g. Fleet managers at logistics companies managing 50+ vehicles in the US" required/>
+      </div>
+
+      <div class="fg-row">
+        <div class="fg">
+          <label>Monthly Budget <span class="req">*</span></label>
+          <select name="budget" required>
+            <option value="" disabled selected>Select range…</option>
+            <option>Under $2,000/month</option>
+            <option>$2,000 - $5,000/month</option>
+            <option>$5,000 - $15,000/month</option>
+            <option>$15,000 - $50,000/month</option>
+            <option>$50,000+/month</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Primary Goal <span class="req">*</span></label>
+          <select name="goals" required>
+            <option value="" disabled selected>Select goal…</option>
+            <option value="Brand awareness and visibility">Brand Awareness</option>
+            <option value="Lead generation and pipeline growth">Lead Generation</option>
+            <option value="Customer acquisition and sales conversion">Customer Acquisition</option>
+            <option value="Customer retention and upsell">Retention &amp; Upsell</option>
+            <option value="Product launch and market entry">Product Launch</option>
+            <option value="Community building and engagement">Community Building</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="generate-btn" id="submitBtn">
+        <span>Generate Strategy</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+    </form>
+  </div>
+
+</div>
+
+<!-- Loading screen -->
+<div class="loading-screen" id="loadingScreen" style="display:none;">
+  <div class="ls-card">
+    <div class="ls-logo">S</div>
+    <h2 class="ls-title">Agents at work</h2>
+    <p class="ls-sub">Your strategy is being generated. Please don't close this tab.</p>
+
+    <div class="ls-pipeline">
+      <div class="ls-step" id="ls-1">
+        <div class="ls-dot"></div>
+        <div class="ls-info">
+          <span class="ls-name">Market Research Agent</span>
+          <span class="ls-status" id="lss-1">Queued</span>
+        </div>
+      </div>
+      <div class="ls-step" id="ls-2">
+        <div class="ls-dot"></div>
+        <div class="ls-info">
+          <span class="ls-name">Audience Intelligence Agent</span>
+          <span class="ls-status" id="lss-2">Queued</span>
+        </div>
+      </div>
+      <div class="ls-step" id="ls-3">
+        <div class="ls-dot"></div>
+        <div class="ls-info">
+          <span class="ls-name">Channel Strategy Agent</span>
+          <span class="ls-status" id="lss-3">Queued</span>
+        </div>
+      </div>
+      <div class="ls-step" id="ls-4">
+        <div class="ls-dot"></div>
+        <div class="ls-info">
+          <span class="ls-name">Content Strategy Agent</span>
+          <span class="ls-status" id="lss-4">Queued</span>
+        </div>
+      </div>
+      <div class="ls-step" id="ls-5">
+        <div class="ls-dot"></div>
+        <div class="ls-info">
+          <span class="ls-name">Report Agent</span>
+          <span class="ls-status" id="lss-5">Queued</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ls-bar">
+      <div class="ls-bar-fill" id="lsBarFill"></div>
+    </div>
+    <p class="ls-eta" id="lsEta">Estimated 60–90 seconds</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('strategyForm').addEventListener('submit', function () {
+  document.getElementById('strategyFormCard').style.display = 'none';
+  document.querySelector('.home-hero').style.display = 'none';
+  document.getElementById('loadingScreen').style.display = 'flex';
+  document.getElementById('submitBtn').disabled = true;
+
+  const steps  = [1,2,3,4,5];
+  const delays = [0, 12000, 24000, 38000, 52000];
+  const dones  = [10000, 22000, 36000, 50000, 65000];
+
+  steps.forEach(function(n, i) {
+    setTimeout(function() {
+      document.getElementById('ls-'+n).classList.add('running');
+      document.getElementById('lss-'+n).textContent = 'Running…';
+      document.getElementById('lsBarFill').style.width = ((i+1)*18)+'%';
+      document.getElementById('lsEta').textContent = 'Step '+(i+1)+' of 5 in progress…';
+    }, delays[i]);
+
+    setTimeout(function() {
+      document.getElementById('ls-'+n).classList.remove('running');
+      document.getElementById('ls-'+n).classList.add('done');
+      document.getElementById('lss-'+n).textContent = '✓ Done';
+    }, dones[i]);
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}{{ company_name }} — Strategy Report — StratoviqueAI{% endblock %}
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+@media print {
+  .sidebar,.ws-topbar,.result-sidebar-panel,.result-actions,.agent-accordion,
+  .print-hide { display: none !important; }
+  .workspace { margin: 0 !important; }
+  .result-layout { display: block !important; }
+  body, .ws-content { background: white !important; color: #111 !important; }
+  .md-content h2 { border-color: #ddd !important; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="result-page">
+
+  <!-- Result header -->
+  <div class="result-header">
+    <div class="rh-left">
+      <div class="status-chip success">
+        <span class="chip-dot"></span>
+        {% if from_history %}Viewing from History{% else %}Report Generated{% endif %}
+      </div>
+      <h1>{{ company_name }}<br><em>Marketing Strategy</em></h1>
+      <p class="rh-meta">
+        6-Agent Pipeline &nbsp;·&nbsp; Session <code>{{ session_id[:8] }}</code>
+      </p>
+    </div>
+    <div class="rh-right result-actions print-hide">
+      <a href="/download/{{ session_id }}" class="btn-action primary" download>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1v8M4 6l3 3 3-3M2 10v2a1 1 0 001 1h8a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Download PDF
+      </a>
+      <a href="/" class="btn-action ghost">New Strategy</a>
+    </div>
+  </div>
+
+  <div class="result-layout">
+
+    <!-- Sticky side panel -->
+    <div class="result-sidebar-panel print-hide">
+      <p class="rsp-label">Contents</p>
+      <nav class="rsp-nav">
+        <a href="#full-report" class="rsp-link active">Full Report</a>
+        <a href="#agent-outputs" class="rsp-link">Agent Outputs</a>
+      </nav>
+      <div class="rsp-meta">
+        <div class="rsp-meta-item">
+          <span class="rsp-meta-label">Company</span>
+          <span>{{ state.company_name }}</span>
+        </div>
+        <div class="rsp-meta-item">
+          <span class="rsp-meta-label">Industry</span>
+          <span>{{ state.industry }}</span>
+        </div>
+        <div class="rsp-meta-item">
+          <span class="rsp-meta-label">Budget</span>
+          <span>{{ state.budget }}</span>
+        </div>
+        <div class="rsp-meta-item">
+          <span class="rsp-meta-label">Goal</span>
+          <span>{{ state.goals }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="result-main">
+
+      <!-- Full Report -->
+      <div id="full-report" class="report-section">
+        {% if state.final_report %}
+          <div class="md-content" data-raw="{{ state.final_report | e }}"></div>
+        {% else %}
+          <div class="report-empty">
+            <p>Report not available. Please regenerate.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Agent Outputs accordion -->
+      <div id="agent-outputs" class="agent-accordion print-hide">
+        <h3 class="aa-title">Supporting Agent Outputs</h3>
+
+        <details class="aa-item">
+          <summary><span class="aa-num">01</span> Market Research <span class="aa-icon">+</span></summary>
+          <div class="aa-body md-content" data-raw="{{ state.market_research | e if state.market_research else 'Not available.' }}"></div>
+        </details>
+        <details class="aa-item">
+          <summary><span class="aa-num">02</span> Audience Profile <span class="aa-icon">+</span></summary>
+          <div class="aa-body md-content" data-raw="{{ state.audience_profile | e if state.audience_profile else 'Not available.' }}"></div>
+        </details>
+        <details class="aa-item">
+          <summary><span class="aa-num">03</span> Channel Strategy <span class="aa-icon">+</span></summary>
+          <div class="aa-body md-content" data-raw="{{ state.channel_strategy | e if state.channel_strategy else 'Not available.' }}"></div>
+        </details>
+        <details class="aa-item">
+          <summary><span class="aa-num">04</span> Content Strategy <span class="aa-icon">+</span></summary>
+          <div class="aa-body md-content" data-raw="{{ state.content_strategy | e if state.content_strategy else 'Not available.' }}"></div>
+        </details>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  marked.setOptions({ breaks: true, gfm: true });
+  document.querySelectorAll('.md-content').forEach(function (el) {
+    const raw = (el.getAttribute('data-raw') || '')
+      .replace(/&amp;/g,'&').replace(/&lt;/g,'<')
+      .replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+    el.innerHTML = marked.parse(raw);
+  });
+
+  document.querySelectorAll('.aa-item').forEach(function (el) {
+    el.addEventListener('toggle', function () {
+      const icon = el.querySelector('.aa-icon');
+      if (icon) icon.textContent = el.open ? '−' : '+';
+    });
+  });
+});
+</script>
+{% endblock %}
